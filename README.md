@@ -60,14 +60,6 @@ Backend API: Node.js / Express (Listening on port 5000)
 
 Make sure you have Node.js installed on your machine to run the backend API server.
 
-2️⃣ Backend Setup
-
-Ensure your backend server is running on http://localhost:5000 with the following endpoints:
-
-POST /analyze-resume
-
-POST /interview-feedback
-
 📁 Project Structure
 
 elevatecv-ai/
