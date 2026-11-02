@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElevateCV AI - AI Career Coach & ATS Analyzer</title>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- PDF.js and Mammoth.js for client-side PDF/DOCX text parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 15% 15%, #0d0f1d 0%, #070913 50%, #030408 100%);
+      --accent-cyan: #06b6d4;
+      --accent-purple: #a855f7;
+      --accent-pink: #ec4899;
+      --accent-emerald: #10b981;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(24px);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: var(--accent-purple);
+      color: white;
+    }
+
+    /* Navigation */
+    nav {
+      width: 100%;
+      padding: 18px 8%;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: var(--glass-blur);
+      background: rgba(7, 9, 19, 0.75);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 95vh;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: center;
+      gap: 50px;
+      padding: 140px 8% 60px;
+    }
+
+    .hero h1 {
+      font-size: 64px;
+      line-height: 1.1;
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: #94a3b8;
+      font-size: 18px;
+      line-height: 1.8;
+      margin-bottom: 35px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #06b6d4, #a855f7);
+      color: white;
+      box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.4);
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -5px rgba(168, 85, 247, 0.5);
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: #e2e8f0;
+      backdrop-filter: blur(10px);
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .hero-avatar-card {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ai-orb {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.3), rgba(168, 85, 247, 0.1));
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 90px rgba(6, 182, 212, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 90px;
+      animation: pulseGlow 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.98); box-shadow: 0 0 60px rgba(6, 182, 212, 0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 0 100px rgba(168, 85, 247, 0.5); }
+    }
+
+    /* Floating Badges */
+    .badge-card {
+      position: absolute;
+      background: rgba(13, 15, 29, 0.85);
+      border: 1px solid var(--card-border);
+      padding: 14px 20px;
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .badge-card.pos-1 { top: 10px; right: 0; }
+    .badge-card.pos-2 { bottom: 20px; left: -20px; }
+
+    /* Section Styling */
+    .section {
+      padding: 90px 8%;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 38px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 16px;
+      margin-bottom: 50px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 30px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: var(--glass-blur);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-5px);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .card-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card h3 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    /* Upload Area */
+    .file-upload-wrapper {
+      position: relative;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      transition: 0.3s;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .file-upload-wrapper:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .file-upload-wrapper input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-status {
+      font-size: 13px;
+      color: var(--accent-cyan);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    /* Form Controls */
+    select, input[type="text"], textarea {
+      width: 100%;
+      margin-top: 10px;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* Question Box */
+    .question-box {
+      background: rgba(6, 182, 212, 0.08);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 16px;
+      border-radius: 8px 12px 12px 8px;
+      margin: 15px 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(7, 9, 19, 0.9);
+      border: 1px solid var(--card-border);
+      display: none;
+      line-height: 1.7;
+    }
+
+    .score-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    /* Skill Tracker Progress Bars */
+    .skill-track {
+      margin-top: 18px;
+    }
+
+    .skill-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .progress-bg {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 10px;
+      transition: width 0.5s ease-in-out;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      border-top: 1px solid var(--card-border);
+      color: #64748b;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">
+      <i data-lucide="sparkles"></i> ElevateCV AI
+    </div>
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#resume-analyzer">Resume Analyzer</a></li>
+      <li><a href="#interview">AI Coach</a></li>
+      <li><a href="#dashboard">Tracker</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div>
+      <h1>Transform Your Job Search With <span class="gradient-text">AI Career Intelligence</span></h1>
+      <p>ElevateCV AI equips you with ATS resume scoring, document file extraction, specialized interview coaching, and live performance tracking.</p>
+      <div class="hero-buttons">
+        <a href="#interview" class="btn primary-btn"><i data-lucide="bot"></i> Start Interview Coach</a>
+        <a href="#resume-analyzer" class="btn secondary-btn"><i data-lucide="upload-cloud"></i> Upload Resume</a>
+      </div>
+    </div>
+    <div class="hero-avatar-card">
+      <div class="ai-orb">🤖</div>
+      <div class="badge-card pos-1">
+        <i data-lucide="shield-check" style="color: var(--accent-cyan);"></i>
+        <div>
+          <div style="font-size: 12px; color: #94a3b8;">ATS Parsing Engine</div>
+          <strong>PDF & DOCX Support</strong>
+        </div>
+      </div>
+      <div class="badge-card pos-2">
+        <i data-lucide="zap" style="color: var(--accent-purple);"></i>
+        <div>
+          <div style="font-size: 12px; color: #94a3b8;">AI Interview Rating</div>
+          <strong>Real-Time Analysis</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Tools Section -->
+  <section class="section" id="tools">
+    <h2 class="section-title">AI Career Suite</h2>
+    <p class="section-subtitle">Select from advanced modules tailored to your career objectives.</p>
+
+    <div class="grid">
+      <!-- 1. RESUME ANALYZER (FILE UPLOAD + TEXT) -->
+      <div class="card" id="resume-analyzer">
+        <div class="card-header">
+          <div class="card-icon"><i data-lucide="file-up"></i></div>
+          <h3>ATS Resume Analyzer</h3>
+        </div>
+        <p style="color: #94a3b8; font-size: 14px;">Upload your resume document or paste plain text below.</p>
+        
+        <div class="file-upload-wrapper">
+          <i data-lucide="upload" style="font-size: 24px; color: var(--accent-cyan);"></i>
+          <p style="font-size: 14px; margin-top: 6px;">Click or drag file to upload (.PDF, .DOCX, .TXT)</p>
+          <input type="file" id="resumeFile" accept=".pdf,.docx,.doc,.txt" onchange="handleFileUpload(event)">
+          <div class="file-status" id="fileStatus"></div>
+        </div>
+
+        <textarea id="resumeText" placeholder="Or paste full resume text here..."></textarea>
+
+        <button class="btn primary-btn" style="width: 100%; margin-top: 15px;" onclick="analyzeResume()">
+          <i data-lucide="cpu"></i> Analyze Resume
+        </button>
+
+        <div class="result-box" id="resumeResult"></div>
+      </div>
+
+      <!-- 2. AI INTERVIEW COACH -->
+      <div class="card" id="interview">
+        <div class="card-header">
+          <div class="card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple);"><i data-lucide="messages-square"></i></div>
+          <h3>AI Interview Coach</h3>
+        </div>
+        
+        <div class="controls-grid">
+          <div>
+            <label style="font-size: 12px; color: #94a3b8;">Domain / Role</label>
+            <select id="jobRole" onchange="generateQuestion()">
+              <option value="Software Engineer">Software Engineer</option>
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Product Manager">Product Manager</option>
+              <option value="Data Scientist">Data Scientist</option>
+              <option value="DevOps & Cloud Engineer">DevOps & Cloud</option>
+              <option value="Cyber Security Analyst">Cyber Security</option>
+              <option value="System Design Specialist">System Design</option>
+              <option value="HR & Behavioral">HR / Behavioral</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: #94a3b8;">Seniority Level</label>
+            <select id="seniority">
+              <option value="Internship / Student">Internship</option>
+              <option value="Entry-Level">Entry-Level</option>
+              <option value="Mid-Level" selected>Mid-Level</option>
+              <option value="Senior / Lead">Senior / Lead</option>
+              <option value="Executive / Director">Executive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="controls-grid">
+          <div>
+            <label style="font-size: 12px; color: #94a3b8;">Interview Mode</label>
+            <select id="interviewMode">
+              <option value="Behavioral">Behavioral (STAR)</option>
+              <option value="Technical Deep-Dive">Technical Deep-Dive</option>
+              <option value="System Design">System Design</option>
+              <option value="HR & Culture Fit">HR & Culture Fit</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: #94a3b8;">Focus Topic</label>
+            <input type="text" id="focusTopic" placeholder="e.g. React, Microservices">
+          </div>
+        </div>
+
+        <button class="btn secondary-btn" style="width: 100%; margin-bottom: 10px;" onclick="generateQuestion()">
+          <i data-lucide="refresh-cw"></i> Next Question
+        </button>
+
+        <div class="question-box" id="currentQuestion">
+          Tell me about a complex project you built and how you handled technical challenges.
+        </div>
+
+        <textarea id="userAnswer" placeholder="Type your response to the question..."></textarea>
+
+        <button class="btn primary-btn" style="width: 100%; margin-top: 15px;" onclick="submitAnswer()">
+          <i data-lucide="send"></i> Evaluate Answer
+        </button>
+
+        <div class="result-box" id="interviewResult"></div>
+      </div>
+
+      <!-- 3. PERFORMANCE TRACKER -->
+      <div class="card" id="dashboard">
+        <div class="card-header">
+          <div class="card-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);"><i data-lucide="line-chart"></i></div>
+          <h3>Performance Metrics</h3>
+        </div>
+        
+        <div class="skill-track">
+          <div class="skill-info"><span>Communication & Structure</span><strong id="stat-comm">92%</strong></div>
+          <div class="progress-bg"><div class="progress-fill" id="bar-comm" style="width: 92%;"></div></div>
+        </div>
+        <div class="skill-track">
+          <div class="skill-info"><span>Technical Proficiency</span><strong id="stat-tech">86%</strong></div>
+          <div class="progress-bg"><div class="progress-fill" id="bar-tech" style="width: 86%;"></div></div>
+        </div>
+        <div class="skill-track">
+          <div class="skill-info"><span>Problem Solving Depth</span><strong id="stat-prob">80%</strong></div>
+          <div class="progress-bg"><div class="progress-fill" id="bar-prob" style="width: 80%;"></div></div>
+        </div>
+        <div class="skill-track">
+          <div class="skill-info"><span>ATS Keyword Relevance</span><strong id="stat-ats">89%</strong></div>
+          <div class="progress-bg"><div class="progress-fill" id="bar-ats" style="width: 89%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 ElevateCV AI | Built for Smart Career Readiness 🚀
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Expanded Question Database
+    const questionBank = {
+      "Software Engineer": [
+        "Tell me about a complex project you built and how you handled technical challenges.",
+        "How do you debug memory leaks or CPU bottlenecks in modern backend services?",
+        "Explain the process you follow when reviewing peer code."
+      ],
+      "Frontend Developer": [
+        "How do you optimize rendering performance in a modern single-page application?",
+        "Explain CSS Flexbox vs Grid and when you choose one over the other.",
+        "How do you approach client-side state management for large scale web applications?"
+      ],
+      "Product Manager": [
+        "How do you prioritize competing feature requests from enterprise clients?",
+        "Describe a product launch that didn't go as planned and what you learned."
+      ],
+      "Data Scientist": [
+        "How do you handle missing or noisy data in a production Machine Learning pipeline?",
+        "Explain the tradeoff between bias and variance to a non-technical stakeholder."
+      ],
+      "DevOps & Cloud Engineer": [
+        "How do you structure a zero-downtime CI/CD deployment pipeline?",
+        "Explain how you troubleshoot container networking issues in Kubernetes."
+      ],
+      "Cyber Security Analyst": [
+        "How would you respond to a suspected credential stuffing attack on an auth service?",
+        "Explain the core differences between symmetric and asymmetric encryption."
+      ],
+      "System Design Specialist": [
+        "How would you design a distributed rate limiter for a public REST API?",
+        "Explain how you choose between relational SQL and document-based NoSQL storage."
+      ],
+      "HR & Behavioral": [
+        "Tell me about a conflict you had with a teammate and how you resolved it.",
+        "Describe a situation where you had to work under tight deadlines."
+      ]
+    };
+
+    function generateQuestion() {
+      const role = document.getElementById("jobRole").value;
+      const questions = questionBank[role] || questionBank["HR & Behavioral"];
+      const randomQ = questions[Math.floor(Math.random() * questions.length)];
+      document.getElementById("currentQuestion").innerText = randomQ;
+    }
+
+    // PDF, DOCX and TXT file extraction
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      const fileStatus = document.getElementById("fileStatus");
+      const resumeText = document.getElementById("resumeText");
+
+      if (!file) return;
+
+      fileStatus.innerText = `Extracting text from: ${file.name}...`;
+
+      try {
+        if (file.type === "application/pdf") {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = "";
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items.map(item => item.str).join(" ");
+            fullText += pageText + "\n";
+          }
+          resumeText.value = fullText;
+          fileStatus.innerText = `Loaded ${file.name} successfully!`;
+        } else if (file.name.endsWith(".docx")) {
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+          resumeText.value = result.value;
+          fileStatus.innerText = `Loaded ${file.name} successfully!`;
+        } else {
+          const text = await file.text();
+          resumeText.value = text;
+          fileStatus.innerText = `Loaded ${file.name} successfully!`;
+        }
+      } catch (err) {
+        fileStatus.innerText = "Error parsing file. Try pasting text manually.";
+      }
+    }
+
+    // Update dynamic stats tracker
+    function updateMetrics(atsVal, commVal, techVal) {
+      if (atsVal) {
+        document.getElementById("stat-ats").innerText = atsVal + "%";
+        document.getElementById("bar-ats").style.width = atsVal + "%";
+      }
+      if (commVal) {
+        document.getElementById("stat-comm").innerText = commVal + "%";
+        document.getElementById("bar-comm").style.width = commVal + "%";
+      }
+      if (techVal) {
+        document.getElementById("stat-tech").innerText = techVal + "%";
+        document.getElementById("bar-tech").style.width = techVal + "%";
+      }
+    }
+
+    async function analyzeResume() {
+      const text = document.getElementById("resumeText").value;
+      const resBox = document.getElementById("resumeResult");
+
+      if (!text.trim()) {
+        alert("Please upload a file or paste resume text first.");
+        return;
+      }
+
+      resBox.style.display = "block";
+      resBox.innerHTML = "<em>Analyzing resume structure with AI...</em>";
+
+      try {
+        const response = await fetch("http://localhost:5000/analyze-resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resumeText: text })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          const data = result.data;
+          resBox.innerHTML = `
+            <div class="score-badge">ATS Score: ${data.score}/100</div>
+            <p><strong>Executive Summary:</strong> ${data.summary}</p>
+            <br>
+            <p style="color: var(--accent-cyan);"><strong>Key Strengths:</strong></p>
+            <ul>${data.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+            <br>
+            <p style="color: var(--accent-pink);"><strong>Recommended Action Items:</strong></p>
+            <ul>${data.improvements.map(i => `<li>${i}</li>`).join('')}</ul>
+          `;
+          updateMetrics(data.score, null, null);
+        } else {
+          resBox.innerText = "Error evaluating resume.";
+        }
+      } catch (err) {
+        resBox.innerText = "Backend disconnected. Ensure server.js is running on port 5000.";
+      }
+    }
+
+    async function submitAnswer() {
+      const question = document.getElementById("currentQuestion").innerText;
+      const answer = document.getElementById("userAnswer").value;
+      const role = document.getElementById("jobRole").value;
+      const seniority = document.getElementById("seniority").value;
+      const interviewMode = document.getElementById("interviewMode").value;
+      const focusTopic = document.getElementById("focusTopic").value;
+      const resBox = document.getElementById("interviewResult");
+
+      if (!answer.trim()) {
+        alert("Please write your answer before submitting.");
+        return;
+      }
+
+      resBox.style.display = "block";
+      resBox.innerHTML = "<em>AI Coach evaluating your response...</em>";
+
+      try {
+        const response = await fetch("http://localhost:5000/interview-feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, answer, role, seniority, interviewMode, focusTopic })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          const data = result.data;
+          resBox.innerHTML = `
+            <div class="score-badge">Overall Rating: ${data.score} / 10</div>
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
+              Communication: <strong>${data.communicationScore}/10</strong> | Technical Depth: <strong>${data.technicalScore}/10</strong>
+            </div>
+            <p style="color: var(--accent-cyan);"><strong>What Worked Well:</strong></p>
+            <ul>${data.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+            <br>
+            <p style="color: var(--accent-pink);"><strong>Points for Improvement:</strong></p>
+            <ul>${data.improvements.map(i => `<li>${i}</li>`).join('')}</ul>
+            <br>
+            <p><strong>Ideal Answer Strategy:</strong></p>
+            <p style="font-size: 13px; color: #cbd5e1;">${data.sampleAnswer}</p>
+          `;
+          
+          // Map scores out of 10 into percentage gauges
+          const commPercent = Math.min(100, data.communicationScore * 10);
+          const techPercent = Math.min(100, data.technicalScore * 10);
+          updateMetrics(null, commPercent, techPercent);
+        } else {
+          resBox.innerText = "Error parsing interview feedback.";
+        }
+      } catch (err) {
+        resBox.innerText = "Backend error. Please check server.js status.";
+      }
+    }
+  </script>
+</body>
+</html>
